@@ -2,17 +2,27 @@ try:
     from PIL import Image, ImageSequence
 except ImportError:
     import Image
-import json
-import os
 
-transparent_foreground = Image.open('Purple.png').convert('RGBA')
-animated_gif = Image.open('background.gif')
+overlay = Image.open('Purple.png').convert('RGBA')
+
+width, height = overlay.size
+print ('WxH: {}:{}'.format(width, height))
+
+background = Image.open('background.gif')
+
+width, height = background.size
+print ('WxH: {}:{}'.format(width, height))
+
+overlay = overlay.resize((width, height), Image.ANTIALIAS)
+
+width, height = overlay.size
+print ('WxH: {}:{}'.format(width, height))
 
 
 frames = []
-for frame in ImageSequence.Iterator(animated_gif):
+for frame in ImageSequence.Iterator(background):
     frame = frame.copy().convert('RGBA')
-    frame.paste(transparent_foreground, mask=transparent_foreground)
+    frame.paste(overlay, mask=overlay)
     frames.append(frame)
 
 print(len(frames))

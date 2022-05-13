@@ -6,6 +6,8 @@ import csv
 import os
 import sys
 import math
+import shutil
+from pathlib import Path
 
 random.seed(10)
 
@@ -38,11 +40,13 @@ def randomPickTraits(trait, teamQty, traitValues, traitQty):
     return pickedTraits
 
 def parseTraits(traits):
+    json_blobs = []
 
     traitNames = list(traits.keys())
     traitNames.remove('Team Jersey')
 
     for team in traits['Team Jersey'].keys():
+        print ('Starting processing team: ' + team)
         teamQty = traits['Team Jersey'][team]
         if (teamQty == 'N/A'):
             continue
@@ -75,9 +79,12 @@ def parseTraits(traits):
             new_blob = json_base_blob
             new_blob['attributes'] = attributes[i]
             json_blobs.append(new_blob.copy())
+        
+        print ('Finished processing team: ' + team)
 
     random.shuffle(json_blobs)
 
+    print ('Starting JSON blob writing')
     writeTeamJsonBlobs(json_blobs)
 
 if __name__ == "__main__":
@@ -90,9 +97,7 @@ if __name__ == "__main__":
     tempNames = []
     tempQty = []
 
-
-    json_blobs = []
-
+    print ('Starting CSV parsing')
     with open('Traits.csv', 'r') as f:
         reader = csv.reader(f, delimiter=',')
         for i, line in enumerate(reader):
@@ -129,4 +134,45 @@ if __name__ == "__main__":
             if (line[1] == 'Trait'):
                 nextLineTrait = True
     
+    print ('Finished extracting CSV traits')
+
+    print ('Writing settings file')
+
+    allTraits = list(traits.keys())
+
+    SETTINGS_FILE = 'settings.json'
+
+    setting_file = Path(SETTINGS_FILE)
+    if setting_file.is_file():
+        print ('Settings file exists... exiting')
+    else:
+        # Start settings file defaults
+        allTraits = list(traits.keys())
+        settingsBlob = {'name': 'Ballerz', 'description': 'Cool project', 'external_url': 'Test'}
+        settingsBlob['traits'] = allTraits
+
+        with open(SETTINGS_FILE, 'w') as json_file:
+            json.dump(settingsBlob, json_file, indent=4)
+
+    
+    # Load settings
+    json_file = open(SETTINGS_FILE, 'r')
+    settings = json.load(json_file)
+    json_file.close()
+
+    json_base_blob['name'] = settings['name']
+    json_base_blob['description'] = settings['description']
+    json_base_blob['external_url'] = settings['external_url']
+
+    print ('Starting JSON blob generation')
+
+    jsonDir = Path(JSON_FOLDER)
+    if jsonDir.is_dir():
+        shutil.rmtree(JSON_FOLDER)
+
+    os.makedirs(JSON_FOLDER)
+
     parseTraits(traits)
+    print ('Finished JSON blob generation')
+
+    
