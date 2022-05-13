@@ -1,8 +1,10 @@
 from multiprocessing.pool import ThreadPool
 try:
-    from PIL import Image
+    from PIL import Image, ImageSequence
 except ImportError:
     import Image
+import shutil
+from pathlib import Path
 import json
 import os
 
@@ -19,16 +21,18 @@ def getValueFromAttributes(attributes, key):
     return None
 
 def getImage(attribute, value):
-    return None
-    return Image.open(ATTRIBUTES_FOLDER + '/' + attribute + '/' + value + '.png').convert('RGBA')
+    return Image.open('Purple.png').convert('RGBA').resize((600, 338), Image.ANTIALIAS)
+
+    #return Image.open(ATTRIBUTES_FOLDER + '/' + attribute + '/' + value + '.png').convert('RGBA')
 
 def loadBackground(value):
-    return Image.open('{}/Backgrounds/{}.gif'.format(ATTRIBUTES_FOLDER, value))
+    return Image.open('background.gif')
+    #return Image.open('{}/Backgrounds/{}.gif'.format(ATTRIBUTES_FOLDER, value))
 
 def countNumFiles(DIR):
     return len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))])
 
-def generateNFT(index, traitOrder):
+def generateNFT(index):
     print ('Generating NFT: ' + str(index))
 
     f = open('{}/{}'.format(JSON_FOLDER, index), 'r')
@@ -43,9 +47,9 @@ def generateNFT(index, traitOrder):
             continue
 
         # Returns the value of the trait
-        value = getValueFromAttributes(trait)
+        value = getValueFromAttributes(attributes, trait)
 
-        if (value is 'None'):
+        if (value == 'None'):
             continue
 
         overlay = getImage(trait, value)
@@ -68,14 +72,19 @@ def generateNFT(index, traitOrder):
         frames.append(frame)
 
     OUTPUT_FILE = '{}/{}.gif'.format(IMAGE_FOLDER, index)
+    print ('Writing gif: ' + OUTPUT_FILE)
 
-    frames[0].save('output.gif', save_all=True, append_images=frames[1:])
+    frames[0].save(OUTPUT_FILE, save_all=True, append_images=frames[1:])
 
 if __name__ == "__main__":
-    numFiles = countNumFiles(JSON_FOLDER)
-    executor = ThreadPool(20)
+    jsonDir = Path(IMAGE_FOLDER)
+    if jsonDir.is_dir():
+        shutil.rmtree(IMAGE_FOLDER)
 
-    traitOrder = []
+    os.makedirs(IMAGE_FOLDER)
+
+    numFiles = countNumFiles(JSON_FOLDER)
+    executor = ThreadPool(10)
 
     SETTINGS_FILE = 'settings.json'
 
@@ -93,10 +102,17 @@ if __name__ == "__main__":
         print ('Settings missing trait_order')
         exit(-1)
 
+    traitOrder = []
+
     traitOrder = settings['trait_order']
 
+    executor.map(generateNFT, range(1, numFiles+1))
+    res.get(60) # Without the timeout this blocking call ignores all signals.
+
+    exit(-1)
+
     try:
-        executor.map(generateNFT, range(1, numFiles+1), traitOrder)
+        executor.map(generateNFT, range(1, numFiles+1))
         res.get(60) # Without the timeout this blocking call ignores all signals.
     except KeyboardInterrupt:
         executor.terminate()

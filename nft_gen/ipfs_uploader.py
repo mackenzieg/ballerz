@@ -5,7 +5,7 @@ import os
 
 JSON_FOLDER = 'json'
 IMAGE_FOLDER = 'images'
-TRACKER_FILE = 'tracker.data'
+TRACKER_FILE = 'ipfs_tracker.data'
 LOG_FILE = 'ipfs_uploader.log'
 
 START_OVER = False
