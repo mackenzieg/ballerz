@@ -7,7 +7,9 @@ async function main() {
     const accounts = await hre.ethers.getSigners();
     const deployer = accounts[0];
 
+    // Testnet router
     const router = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
+
     const owner = '0x8F45293aA3461ace09bD4ee2BA8CE65AAd9967d4'
     const squadDevelopment = '0x18548927bd3a5025A1cfa97910033C329041Fb98';
     const insuranceFund = '0x18548927bd3a5025A1cfa97910033C329041Fb98';
