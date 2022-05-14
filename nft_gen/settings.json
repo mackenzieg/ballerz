@@ -23,6 +23,27 @@
         "Ground/Field Style",
         "Facial Expression"
     ],
+    "trait_order": [
+        "Team Jersey",
+        "Background",
+        "Eye Gear",
+        "Hairstyle",
+        "Headgear",
+        "Shorts",
+        "Ball",
+        "Boots/Cleats",
+        "Shin Guards & Socks",
+        "Neck",
+        "Left Arm",
+        "Right Arm",
+        "Tattoo ",
+        "Jersey Style",
+        "Jersey Number",
+        "Facial Hair",
+        "Skins",
+        "Ground/Field Style",
+        "Facial Expression"
+    ],
     "skipped_teams": [
         "United Arab Emirates",
         "New Zealand",

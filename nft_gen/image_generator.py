@@ -84,7 +84,7 @@ if __name__ == "__main__":
     os.makedirs(IMAGE_FOLDER)
 
     numFiles = countNumFiles(JSON_FOLDER)
-    executor = ThreadPool(10)
+    executor = ThreadPool(8)
 
     SETTINGS_FILE = 'settings.json'
 
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     traitOrder = settings['trait_order']
 
     executor.map(generateNFT, range(1, numFiles+1))
-    res.get(60) # Without the timeout this blocking call ignores all signals.
+    res.get(9300 * 100) # Without the timeout this blocking call ignores all signals.
 
     exit(-1)
 
