@@ -52,6 +52,11 @@ if (START_OVER):
 if (lastUploaded == numJson):
     exit(-1)
 
+STOP_AT = 9300
+
+if (numJson > STOP_AT):
+    numJson = STOP_AT
+
 #for i in range(lastUploaded+1, numJson+1):
 for i in range(1, 3):
     print ('Uploaded NFT: ' + str(i))

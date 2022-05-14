@@ -13,11 +13,35 @@ random.seed(10)
 
 json_base_blob = {'name': 'Degen Waifus', 'description': 'asd', 'external_url': 'test_url', 'image': '', 'attributes': []}
 JSON_FOLDER = 'json'
+TRACKER_FILE = 'json_tracker.data'
+
+def getLastUploadedFile():
+    fle = Path(TRACKER_FILE)
+    fle.touch(exist_ok=True)
+    f = open(fle, 'r+')
+    lines = f.readlines()
+    if (len(lines) == 0):
+        return 0
+
+    return int(lines[-1])
 
 def writeTeamJsonBlobs(json_blobs):
-    for index in range(len(json_blobs)):
-        with open(JSON_FOLDER  + '/' + str(index + 1), 'w') as json_file:
-            json.dump(json_blobs[index], json_file, indent=4)
+    lastTouchedJson = getLastUploadedFile()
+
+    if (lastTouchedJson == len(json_blobs)):
+        print ('All JSON already written... exiting')
+        exit(-1)
+
+    if (lastTouchedJson == 0):
+        lastTouchedJson = 1
+
+    for index in range(lastTouchedJson, len(json_blobs) + 1):
+        with open(JSON_FOLDER  + '/' + str(index), 'w') as json_file:
+            json.dump(json_blobs[index-1], json_file, indent=4)
+
+        # Write last touched file        
+        with open(TRACKER_FILE, 'w') as f:
+            f.write('{}\n'.format(index))
 
 def randomPickTraits(trait, teamQty, traitValues, traitQty):
     if (not teamQty == sum(traitQty)):
@@ -39,8 +63,9 @@ def randomPickTraits(trait, teamQty, traitValues, traitQty):
 
     return pickedTraits
 
-def parseTraits(traits):
+def parseTraits(traits, fixedSkippedTeams, skippedTeams):
     json_blobs = []
+    skipped_teams_blobs = []
 
     traitNames = list(traits.keys())
     traitNames.remove('Team Jersey')
@@ -78,11 +103,19 @@ def parseTraits(traits):
             attributes[i].insert(0, attribute)
             new_blob = json_base_blob
             new_blob['attributes'] = attributes[i]
-            json_blobs.append(new_blob.copy())
+
+            if (fixSkippedTeams and team in skippedTeams):
+                skipped_teams_blobs.append(new_blob.copy())
+            else:
+                json_blobs.append(new_blob.copy())
         
         print ('Finished processing team: ' + team)
 
     random.shuffle(json_blobs)
+    random.shuffle(skipped_teams_blobs)
+
+    if (len(skipped_teams_blobs) > 0):
+        json_blobs = json_blobs + skipped_teams_blobs
 
     print ('Starting JSON blob writing')
     writeTeamJsonBlobs(json_blobs)
@@ -150,11 +183,12 @@ if __name__ == "__main__":
         allTraits = list(traits.keys())
         settingsBlob = {'name': 'Ballerz', 'description': 'Cool project', 'external_url': 'Test'}
         settingsBlob['traits'] = allTraits
+        settingsBlob['skipped_teams'] = ['United Arab Emirates', 'New Zealand', 'Scotland', 'Australia', 'Wales', 'Peru']
+        settingsBlob['fix_skipped_teams'] = True
 
         with open(SETTINGS_FILE, 'w') as json_file:
             json.dump(settingsBlob, json_file, indent=4)
 
-    
     # Load settings
     json_file = open(SETTINGS_FILE, 'r')
     settings = json.load(json_file)
@@ -172,7 +206,10 @@ if __name__ == "__main__":
 
     os.makedirs(JSON_FOLDER)
 
-    parseTraits(traits)
+    fixSkippedTeams = settings['fix_skipped_teams']
+    skippedTeams = settings['skipped_teams']
+
+    parseTraits(traits, fixSkippedTeams, skippedTeams)
     print ('Finished JSON blob generation')
 
     

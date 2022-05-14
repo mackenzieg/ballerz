@@ -1,6 +1,6 @@
 {
     "name": "Ballerz",
-    "description": "Cool project dick",
+    "description": "Cool project",
     "external_url": "Test",
     "traits": [
         "Team Jersey",
@@ -23,25 +23,13 @@
         "Ground/Field Style",
         "Facial Expression"
     ],
-    "trait_order": [
-        "Team Jersey",
-        "Background",
-        "Eye Gear",
-        "Hairstyle",
-        "Headgear",
-        "Shorts",
-        "Ball",
-        "Boots/Cleats",
-        "Shin Guards & Socks",
-        "Neck",
-        "Left Arm",
-        "Right Arm",
-        "Tattoo ",
-        "Jersey Style",
-        "Jersey Number",
-        "Facial Hair",
-        "Skins",
-        "Ground/Field Style",
-        "Facial Expression"
-    ]
+    "skipped_teams": [
+        "United Arab Emirates",
+        "New Zealand",
+        "Scotland",
+        "Australia",
+        "Wales",
+        "Peru"
+    ],
+    "fix_skipped_teams": true
 }

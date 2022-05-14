@@ -88,7 +88,6 @@ contract DOTD is ERC721Enumerable, Ownable {
      */
     function mintTokenId(uint256 tokenId) public onlyOwner {
         require(!_exists(tokenId), "Token was minted");
-        uint256 first_encounter = block.timestamp;
         _safeMint(msg.sender, tokenId);
     }
 
