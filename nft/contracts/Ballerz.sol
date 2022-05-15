@@ -51,12 +51,15 @@ contract Ballerz is ERC721Enumerable, Ownable {
     }
 
     /*
-     * Set dev address
+     * Set dev fund address
      */
     function setDevFundAddress(address newDevFundAddress) public onlyOwner {
         devFundAddress = newDevFundAddress;
     }
 
+    /*
+     * Set max purchase
+     */
     function setMaxPurchase(uint256 newMax) public onlyOwner {
         MAX_PURCHASE = newMax;
     }
@@ -69,7 +72,7 @@ contract Ballerz is ERC721Enumerable, Ownable {
     }
 
     /*
-     * Pause sale if active, make active if paused
+     * Change state of sale
      */
     function setSaleState(bool newState) public onlyOwner {
         saleIsActive = newState;
@@ -100,9 +103,7 @@ contract Ballerz is ERC721Enumerable, Ownable {
 
         for (uint256 i = 1; i <= numberOfTokens; i++) {
             tokenId = totalSupply().add(1);
-            if (tokenId <= MAX_TOKENS) {
-                _safeMint(msg.sender, tokenId);
-            }
+            _safeMint(msg.sender, tokenId);
         }
     }
 
