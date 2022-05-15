@@ -12,23 +12,18 @@ import "./token/ERC721Enumerable.sol";
 import "./token/ERC1155.sol";
 import "./token/SafeERC20.sol";
 
-contract DOTD is ERC721Enumerable, Ownable {
+contract Ballerz is ERC721Enumerable, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    address private devAddress;
+    // Address to pay development funds to
+    address private devFundAddress;
 
     // Max amount of token to purchase per account each time
     uint256 public MAX_PURCHASE = 20;
 
-    // Maximum amount of tokens to supply for devs
-    uint256 public DEV_TOKENS = 101;
-    // Keep track of number of dev tokens that have been minted
-    uint256 public num_minted_dev;
-
     // Maximum amount of tokens to supply.
-    // Max total tokens is 10000 + 101 = 10101 
-    uint256 public MAX_TOKENS = DEV_TOKENS + 10000;
+    uint256 public MAX_TOKENS = 9300;
 
     // Current price.
     uint256 public CURRENT_PRICE = 0.03 ether;
@@ -42,11 +37,9 @@ contract DOTD is ERC721Enumerable, Ownable {
     /**
      * Contract constructor
      */
-    constructor(string memory name, string memory symbol) ERC721(name, symbol) {
-        devAddress = msg.sender;
-
-        // Too much gas to run here make sure to run reserve right after deploy :(
-        // reserveTokens();
+    constructor(string memory _name, string memory _symbol, address _owner) ERC721(_name, _symbol) {
+        devFundAddress = _owner;
+        transferOwnership(_owner);
     }
 
     /**
@@ -54,48 +47,18 @@ contract DOTD is ERC721Enumerable, Ownable {
      */
     function withdraw() public onlyOwner {
         uint256 balance = address(this).balance;
-        payable(devAddress).transfer(balance);
-    }
-
-    /**
-     * Reserve first tokens for devs
-     */
-    function reserveTokens() public onlyOwner {
-        uint256 tokenId;
-        uint256 first_encounter = block.timestamp;
-
-        // Too much gas to run in a single transaction to break into 40 NFTs at a time
-        uint256 end_index = totalSupply() + 40;
-
-        if (num_minted_dev + 40 > DEV_TOKENS) {
-            end_index = totalSupply() + (DEV_TOKENS - num_minted_dev);
-            num_minted_dev = DEV_TOKENS;
-        } else {
-            num_minted_dev += 40;
-        }
-	
-
-        for (uint256 i = totalSupply() + 1; i <= end_index; i++) {
-            tokenId = totalSupply().add(1);
-            if (tokenId <= MAX_TOKENS) {
-                _safeMint(msg.sender, tokenId);
-            }
-        }
-    }
-
-    /**
-     * Mint a specific token.
-     */
-    function mintTokenId(uint256 tokenId) public onlyOwner {
-        require(!_exists(tokenId), "Token was minted");
-        _safeMint(msg.sender, tokenId);
+        payable(devFundAddress).transfer(balance);
     }
 
     /*
      * Set dev address
      */
-    function setDevAddress(address newDevAddress) public onlyOwner {
-        devAddress = newDevAddress;
+    function setDevFundAddress(address newDevFundAddress) public onlyOwner {
+        devFundAddress = newDevFundAddress;
+    }
+
+    function setMaxPurchase(uint256 newMax) public onlyOwner {
+        MAX_PURCHASE = newMax;
     }
 
     /*
@@ -113,9 +76,9 @@ contract DOTD is ERC721Enumerable, Ownable {
     }
 
     /**
-     * Mint Day Of The Dead NFT
+     * Mint Ballerz NFTs
      */
-    function mintDOTD(uint256 numberOfTokens) public payable {
+    function mint(uint256 numberOfTokens) public payable {
         require(saleIsActive, "Minting is currently disabled");
         require(
             numberOfTokens >= 1,
@@ -127,13 +90,12 @@ contract DOTD is ERC721Enumerable, Ownable {
         );
         require(
             totalSupply().add(numberOfTokens) <= MAX_TOKENS,
-            "Purchase would exceed max supply of DOTD"
+            "Purchase would exceed max supply of Ballerz"
         );
         require(
             CURRENT_PRICE.mul(numberOfTokens) <= msg.value,
             "Value does not match required amount"
         );
-        uint256 first_encounter = block.timestamp;
         uint256 tokenId;
 
         for (uint256 i = 1; i <= numberOfTokens; i++) {
@@ -182,13 +144,6 @@ contract DOTD is ERC721Enumerable, Ownable {
      */
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
-    }
-
-    /**
-     *
-     */
-    function getNumMintedDev() public view returns (uint256) {
-	return num_minted_dev;
     }
 
     /**
