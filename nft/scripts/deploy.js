@@ -6,18 +6,15 @@ async function main() {
     await hre.run('compile');
 
     const accounts = await ethers.getSigners();
-    const dotdDeployer = accounts[0];
+    const ballerzDeployer = accounts[0];
 
-    this.DOTD = await hre.ethers.getContractFactory("DOTD", dotdDeployer);
+    const owner = '0x8F45293aA3461ace09bD4ee2BA8CE65AAd9967d4'
 
-    this.dotdContract = await this.DOTD.deploy("The Dead", "DOTD");
-    this.dotdAddress = await this.dotdContract.address;
+    this.ballerz = await hre.ethers.getContractFactory("Ballerz", ballerzDeployer);
 
-    await this.dotdContract.connect(dotdDeployer).reserveTokens();
-    await this.dotdContract.connect(dotdDeployer).reserveTokens();
-    await this.dotdContract.connect(dotdDeployer).reserveTokens();
-
-    await this.dotdContract.connect(dotdDeployer).setBaseURI('https://ipfs.io/ipfs/QmPvPbcWRTugH7asUAs26VCH6SDXbg1fcBJ9bVa4Ae61ct/');
+    this.ballerzContract = await this.ballerz.deploy("Ballerz", "BLRZ", owner);
+    this.ballerzAddress = await this.ballerzContract.address;
+    console.log('Ballerz Address: ' + this.ballerzAddress)
 }
 
 main()
